@@ -11,6 +11,7 @@ export default function Bai03() {
   const [loading, setLoading] = useState(false);
   const [isCalculated, setIsCalculated] = useState(false);
 
+  // Bộ preset trọng số
   const applyPreset = (presetType) => {
     let preset = {};
     if (presetType === 'default') {
@@ -29,17 +30,6 @@ export default function Bai03() {
 
   const calculatePriorityScore = () => {
     setLoading(true);
-
-    const sanitizedWeights = {
-      w_growth: parseFloat(inputs.w_growth) || 0,
-      w_prod: parseFloat(inputs.w_prod) || 0,
-      w_spillover: parseFloat(inputs.w_spillover) || 0,
-      w_export: parseFloat(inputs.w_export) || 0,
-      w_employment: parseFloat(inputs.w_employment) || 0,
-      w_ai: parseFloat(inputs.w_ai) || 0,
-      w_risk: parseFloat(inputs.w_risk) || 0
-    };
-
     fetch('http://localhost:8000/api/bai3/calculate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -47,108 +37,83 @@ export default function Bai03() {
     })
     .then(res => res.json())
     .then(data => {
-      setResData(data);
+      if (data && data.success) {
+        setResData(data);
+        setIsCalculated(true);
+      } else {
+        alert("Lỗi tính toán từ server");
+      }
       setLoading(false);
-      if (data && data.success) setIsCalculated(true);
     })
     .catch(err => {
-      console.error("Lỗi gọi API Bài 3:", err);
+      console.error("Lỗi:", err);
       setLoading(false);
     });
   };
-
-  const COLORS = ['#38bdf8', '#00c49f', '#ffbb28', '#ff8042', '#a4de6c', '#d0ed57', '#ff6b6b', '#8e44ad', '#2c3e50', '#16a085'];
+  
+  const COLORS = ['#38bdf8', '#34d399', '#fbbf24', '#f87171', '#a78bfa', '#fb7185', '#60a5fa', '#f472b6', '#4ade80', '#fb923c'];
 
   return (
-    <div style={{ color: '#ffffff', maxWidth: '1400px', margin: '0 auto', paddingBottom: '30px' }}>
+    <div style={{ color: '#ffffff', maxWidth: '1400px', margin: '0 auto', paddingBottom: '30px', fontFamily: 'sans-serif' }}>
       
       <div style={{ marginBottom: '25px' }}>
-        <h1 style={{ fontSize: '24px', margin: '0 0 5px 0', fontWeight: 'bold' }}>BÀI 3 — TÍNH CHỈ SỐ ƯU TIÊN NGÀNH PRIORITY CHO 10 NGÀNH VIỆT NAM</h1>
+        <h1 style={{ fontSize: '24px', fontWeight: 'bold' }}>BÀI 3 — TÍNH CHỈ SỐ ƯU TIÊN NGÀNH PRIORITY</h1>
       </div>
 
-      <div style={{ backgroundColor: '#161a25', border: '1px solid #232936', borderRadius: '8px', padding: '20px', marginBottom: '25px' }}>
-        <div style={{ fontSize: '14px', color: '#aaa', marginBottom: '10px' }}><b>Mô hình Định lượng Đa tiêu chí (MCDM)</b></div>
-        <div style={{ fontSize: '16px', color: '#34d399', fontFamily: 'serif', fontWeight: 'bold' }}>
-          {"Priority = a₁·Growth + a₂·Productivity + a₃·Spillover + a₄·Export + a₅·Employment + a₆·AIReadiness + a₇·AutomationRisk"}
+      {/* KHỐI MỚI BỔ SUNG: Mô hình toán học */}
+      <div style={{ backgroundColor: '#161a25', border: '1px solid #232936', borderTop: '3px solid #38bdf8', borderRadius: '8px', padding: '20px', marginBottom: '25px' }}>
+        <h3 style={{ margin: '0 0 15px 0', fontSize: '15px', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '16px' }}>🔢</span> Mô hình toán học
+        </h3>
+        <div style={{ backgroundColor: '#0f172a', padding: '15px 20px', borderRadius: '6px', overflowX: 'auto', marginBottom: '12px' }}>
+          <p style={{ fontFamily: '"Times New Roman", Times, serif', fontSize: '22px', color: '#cbd5e1', margin: 0, whiteSpace: 'nowrap', letterSpacing: '0.5px' }}>
+            <b style={{color: '#fff'}}><i>Priority</i><sub>i</sub></b> = a<sub>1</sub><i>Growth</i><sub>i</sub> + a<sub>2</sub><i>Productivity</i><sub>i</sub> + a<sub>3</sub><i>Spillover</i><sub>i</sub> + a<sub>4</sub><i>Export</i><sub>i</sub> + a<sub>5</sub><i>Employment</i><sub>i</sub> + a<sub>6</sub><i>AI</i><sub>i</sub> + a<sub>7</sub><i>RiskAdjusted</i><sub>i</sub>
+          </p>
         </div>
-        <p style={{ fontSize: '12.5px', color: '#94a3b8', margin: '8px 0 0 0' }}>
-          * Hệ số Automation Risk được xử lý đảo dấu (chuẩn hóa nghịch thế) để đảm bảo ngành có rủi ro tự động hóa cao sẽ nhận điểm ưu tiên thấp hơn khi hướng tới tính bền vững.
+        <p style={{ margin: 0, fontSize: '13px', color: '#94a3b8' }}>
+          Dữ liệu được chuẩn hóa min-max về thang [0,1]. Chỉ tiêu Risk được đảo dấu để giá trị cao hơn phản ánh mức rủi ro tự động hóa thấp hơn.
         </p>
       </div>
 
-      {/* Khối tinh chỉnh trọng số chính sách */}
+      {/* Điều khiển trọng số */}
       <div style={{ backgroundColor: '#161a25', border: '1px solid #232936', borderRadius: '8px', padding: '20px', marginBottom: '30px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #232936', paddingBottom: '12px' }}>
-          <h3 style={{ margin: 0, fontSize: '15px', color: '#38bdf8' }}>🎛️ Phân bổ trọng số chính sách (Tổng các hệ số sẽ tự động chuẩn hóa về 1.0)</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+          <h3 style={{ margin: 0, fontSize: '15px', color: '#38bdf8' }}>🎛️ Phân bổ trọng số chính sách</h3>
           <div style={{ display: 'flex', gap: '10px' }}>
-            <button onClick={() => applyPreset('default')} style={{ backgroundColor: '#334155', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>Mặc định chuyên gia</button>
-            <button onClick={() => applyPreset('growth')} style={{ backgroundColor: '#1e3a8a', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>Định hướng tăng trưởng</button>
-            <button onClick={() => applyPreset('inclusive')} style={{ backgroundColor: '#065f46', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>Định hướng bao trùm</button>
+            <button onClick={() => applyPreset('default')} style={{ backgroundColor: '#334155', color: '#fff', border: 'none', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>Mặc định</button>
+            <button onClick={() => applyPreset('growth')} style={{ backgroundColor: '#1e3a8a', color: '#fff', border: 'none', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>Tăng trưởng</button>
+            <button onClick={() => applyPreset('inclusive')} style={{ backgroundColor: '#065f46', color: '#fff', border: 'none', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>Bao trùm</button>
           </div>
         </div>
-
-        {/* Thanh trượt tinh chỉnh thông số đầu vào */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '25px' }}>
-          <div>
-            <label style={{ fontSize: '12px', color: '#aaa' }}>Tăng trưởng (Growth): {inputs.w_growth}</label>
-            <input type="range" min="0" max="1" step="0.05" value={inputs.w_growth} onChange={e => handleWeightChange('w_growth', e.target.value)} style={{ width: '100%', accentColor: '#ff4b4b' }} />
-          </div>
-          <div>
-            <label style={{ fontSize: '12px', color: '#aaa' }}>Năng suất (Productivity): {inputs.w_prod}</label>
-            <input type="range" min="0" max="1" step="0.05" value={inputs.w_prod} onChange={e => handleWeightChange('w_prod', e.target.value)} style={{ width: '100%', accentColor: '#ff4b4b' }} />
-          </div>
-          <div>
-            <label style={{ fontSize: '12px', color: '#aaa' }}>Hệ số lan tỏa (Spillover): {inputs.w_spillover}</label>
-            <input type="range" min="0" max="1" step="0.05" value={inputs.w_spillover} onChange={e => handleWeightChange('w_spillover', e.target.value)} style={{ width: '100%', accentColor: '#ff4b4b' }} />
-          </div>
-          <div>
-            <label style={{ fontSize: '12px', color: '#aaa' }}>Xuất khẩu (Export): {inputs.w_export}</label>
-            <input type="range" min="0" max="1" step="0.05" value={inputs.w_export} onChange={e => handleWeightChange('w_export', e.target.value)} style={{ width: '100%', accentColor: '#ff4b4b' }} />
-          </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '15px' }}>
+          {Object.keys(inputs).map(key => (
+            <div key={key}>
+              <label style={{ fontSize: '12px', color: '#aaa' }}>{key.replace('w_', '').toUpperCase()}: {inputs[key]}</label>
+              <input type="range" min="0" max="1" step="0.05" value={inputs[key]} onChange={e => handleWeightChange(key, e.target.value)} style={{ width: '100%', accentColor: '#38bdf8' }} />
+            </div>
+          ))}
         </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '25px' }}>
-          <div>
-            <label style={{ fontSize: '12px', color: '#aaa' }}>Việc làm (Employment): {inputs.w_employment}</label>
-            <input type="range" min="0" max="1" step="0.05" value={inputs.w_employment} onChange={e => handleWeightChange('w_employment', e.target.value)} style={{ width: '100%', accentColor: '#ff4b4b' }} />
-          </div>
-          <div>
-            <label style={{ fontSize: '12px', color: '#aaa' }}>Sẵn sàng AI (AI Readiness): {inputs.w_ai}</label>
-            <input type="range" min="0" max="1" step="0.05" value={inputs.w_ai} onChange={e => handleWeightChange('w_ai', e.target.value)} style={{ width: '100%', accentColor: '#ff4b4b' }} />
-          </div>
-          <div>
-            <label style={{ fontSize: '12px', color: '#aaa' }}>Rủi ro tự động hóa (Risk): {inputs.w_risk}</label>
-            <input type="range" min="0" max="1" step="0.05" value={inputs.w_risk} onChange={e => handleWeightChange('w_risk', e.target.value)} style={{ width: '100%', accentColor: '#ff4b4b' }} />
-          </div>
-        </div>
-
-        <button onClick={calculatePriorityScore} disabled={loading} style={{ backgroundColor: '#2563eb', color: '#fff', border: 'none', padding: '12px 25px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', width: '200px' }}>
+        <button onClick={calculatePriorityScore} disabled={loading} style={{ marginTop: '20px', backgroundColor: '#2563eb', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>
           {loading ? '⏳ Đang phân tích...' : '▶️ Chạy mô hình'}
         </button>
       </div>
 
-      {/* Cơ chế ẩn kết quả, chỉ xuất hiện khi click nút */}
-      {!isCalculated ? (
-        <div style={{ textAlign: 'center', padding: '40px', backgroundColor: '#161a25', borderRadius: '8px', border: '1px dashed #232936', color: '#64748b' }}>
-          💡 Vui lòng lựa chọn hoặc thiết lập ma trận trọng số chính sách và bấm nút <b>"Chạy mô hình"</b> để trích xuất thứ hạng ưu tiên số của 10 ngành kinh tế.
-        </div>
-      ) : (
+      {/* Kết quả hiển thị */}
+      {isCalculated && resData && (
         <>
-          {/* Bố cục chia đôi: Trái đồ thị cột dọc xếp hạng, Phải bảng điểm số chi tiết */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1.6fr', gap: '20px', marginBottom: '30px' }}>
-            
-            {/* Biểu đồ cột Recharts */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            {/* Đồ thị */}
             <div style={{ backgroundColor: '#161a25', border: '1px solid #232936', borderRadius: '8px', padding: '20px' }}>
-              <h4 style={{ margin: '0 0 15px 0', fontSize: '14px', color: '#fff' }}>📊 Chỉ số ưu tiên phát triển số hóa (Priority Score) giảm dần</h4>
-              <div style={{ width: '100%', height: 380 }}>
+              <h4 style={{ fontSize: '14px', color: '#fff', marginBottom: '15px' }}>📊 Chỉ số ưu tiên Priority</h4>
+              <div style={{ width: '100%', height: 400 }}>
                 <ResponsiveContainer>
-                  <BarChart data={resData.ranking_results} layout="vertical" margin={{ left: 15, right: 10 }}>
+                  <BarChart data={resData.allocation_chart || []} layout="vertical">
                     <CartesianGrid strokeDasharray="3 3" stroke="#232936" />
                     <XAxis type="number" stroke="#94a3b8" domain={[0, 1]} />
-                    <YAxis dataKey="sector_name_vi" type="category" stroke="#94a3b8" fontSize={11} width={130} />
+                    <YAxis dataKey="factor" type="category" stroke="#94a3b8" fontSize={11} width={130} />
                     <Tooltip contentStyle={{ backgroundColor: '#161a25', color: '#fff' }} />
-                    <Bar dataKey="Priority" radius={[0, 4, 4, 0]}>
-                      {resData.ranking_results.map((entry, index) => (
+                    <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+                      {(resData.allocation_chart || []).map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Bar>
@@ -157,25 +122,106 @@ export default function Bai03() {
               </div>
             </div>
 
-            {/* Bảng xếp hạng thứ tự giảm dần */}
+            {/* Bảng độ nhạy */}
             <div style={{ backgroundColor: '#161a25', border: '1px solid #232936', borderRadius: '8px', padding: '20px' }}>
-              <h4 style={{ margin: '0 0 15px 0', fontSize: '14px', color: '#38bdf8' }}>📋 Bảng tổng hợp xếp hạng ưu tiên đầu tư số công nghệ quốc gia</h4>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+              <h4 style={{ fontSize: '14px', color: '#fff', marginBottom: '15px' }}>📈 Kiểm toán độ nhạy (a₆)</h4>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                 <thead>
-                  <tr style={{ borderBottom: '2px solid #232936', color: '#94a3b8', textAlign: 'left' }}>
-                    <th style={{ padding: '10px 5px' }}>Thứ hạng</th>
-                    <th style={{ padding: '10px 5px' }}>Tên ngành kinh tế</th>
-                    <th style={{ padding: '10px 5px', textAlign: 'right' }}>Điểm số Priority (Z)</th>
+                  <tr style={{ borderBottom: '1px solid #232936', color: '#94a3b8', textAlign: 'left' }}>
+                    <th style={{ padding: '8px' }}>a₆</th>
+                    <th style={{ padding: '8px' }}>Top 1</th>
+                    <th style={{ padding: '8px' }}>Top 2</th>
+                    <th style={{ padding: '8px' }}>Top 3</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {resData.ranking_results.map((row) => (
-                    <tr key={row.rank} style={{ borderBottom: '1px solid #232936', backgroundColor: row.rank <= 3 ? '#1e293b' : 'transparent' }}>
-                      <td style={{ padding: '11px 5px', fontWeight: 'bold', color: row.rank <= 3 ? '#ffbb28' : '#fff' }}>
-                        {row.rank === 1 ? '🥇 ' : row.rank === 2 ? '🥈 ' : row.rank === 3 ? '🥉 ' : ''}{row.rank}
-                      </td>
-                      <td style={{ padding: '11px 5px' }}>{row.sector_name_vi}</td>
-                      <td style={{ padding: '11px 5px', textAlign: 'right', fontWeight: 'bold', color: '#34d399' }}>{row.Priority.toFixed(4)}</td>
+                  {(resData.sensitivity_heatmap || []).map((row, idx) => (
+                    <tr key={idx} style={{ borderBottom: '1px solid #232936' }}>
+                      <td style={{ padding: '8px' }}>{row.a6_weight?.toFixed(2) || (row.a6 && row.a6.toFixed(2))}</td>
+                      <td style={{ padding: '8px' }}>{row.top_1 || row.top1}</td>
+                      <td style={{ padding: '8px' }}>{row.top_2 || row.top2}</td>
+                      <td style={{ padding: '8px' }}>{row.top_3 || row.top3}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '20px', marginTop: '20px' }}>
+            {/* Xếp hạng 10 ngành theo Priority */}
+            <div style={{ backgroundColor: '#161a25', border: '1px solid #232936', borderRadius: '8px', padding: '20px' }}>
+              <h4 style={{ fontSize: '14px', color: '#fff', marginBottom: '15px' }}>🏆 Xếp hạng 10 ngành theo Priority</h4>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid #232936', color: '#94a3b8', textAlign: 'left' }}>
+                    <th style={{ padding: '8px' }}>Hạng</th>
+                    <th style={{ padding: '8px' }}>Ngành</th>
+                    <th style={{ padding: '8px' }}>Điểm (Priority)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(resData.ranking_results || []).map((row, idx) => (
+                    <tr key={idx} style={{ borderBottom: '1px solid #232936' }}>
+                      <td style={{ padding: '8px', color: '#38bdf8', fontWeight: 'bold' }}>{row.rank || idx + 1}</td>
+                      <td style={{ padding: '8px' }}>{row.sector_name_vi || row.name}</td>
+                      <td style={{ padding: '8px', color: '#34d399' }}>{row.Priority ? row.Priority.toFixed(4) : "0.0000"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* So sánh hai bộ trọng số chính sách */}
+            <div style={{ backgroundColor: '#161a25', border: '1px solid #232936', borderRadius: '8px', padding: '20px' }}>
+              <h4 style={{ fontSize: '14px', color: '#fff', marginBottom: '15px' }}>⚖️ So sánh hai bộ trọng số chính sách</h4>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', whiteSpace: 'nowrap' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid #232936', color: '#94a3b8', textAlign: 'left' }}>
+                      <th style={{ padding: '8px' }}>Bộ trọng số</th>
+                      <th style={{ padding: '8px' }}>Top 1</th>
+                      <th style={{ padding: '8px' }}>Top 2</th>
+                      <th style={{ padding: '8px' }}>Top 3</th>
+                      <th style={{ padding: '8px' }}>Diễn giải</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(resData.comparison || []).map((row, idx) => (
+                      <tr key={idx} style={{ borderBottom: '1px solid #232936' }}>
+                        <td style={{ padding: '8px', fontWeight: 'bold', color: '#fbbf24' }}>{row.name}</td>
+                        <td style={{ padding: '8px' }}>{row.top1 || row.top}</td>
+                        <td style={{ padding: '8px' }}>{row.top2 || ""}</td>
+                        <td style={{ padding: '8px' }}>{row.top3 || ""}</td>
+                        <td style={{ padding: '8px', color: '#cbd5e1' }}>{row.desc || ""}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          {/* Ma trận dữ liệu đã chuẩn hóa min-max */}
+          <div style={{ backgroundColor: '#161a25', border: '1px solid #232936', borderRadius: '8px', padding: '20px', marginTop: '20px' }}>
+            <h4 style={{ fontSize: '14px', color: '#fff', marginBottom: '15px' }}>🔢 Ma trận dữ liệu đã chuẩn hóa Min-Max</h4>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', whiteSpace: 'nowrap' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid #232936', color: '#94a3b8', textAlign: 'left' }}>
+                    {resData.normalized_data && resData.normalized_data.length > 0 && Object.keys(resData.normalized_data[0]).map(key => (
+                      <th key={key} style={{ padding: '8px', textTransform: 'capitalize' }}>{key}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {(resData.normalized_data || []).map((row, idx) => (
+                    <tr key={idx} style={{ borderBottom: '1px solid #232936' }}>
+                      {Object.values(row).map((val, vIdx) => (
+                        <td key={vIdx} style={{ padding: '8px' }}>
+                          {typeof val === 'number' ? val.toFixed(4) : val}
+                        </td>
+                      ))}
                     </tr>
                   ))}
                 </tbody>
@@ -183,17 +229,32 @@ export default function Bai03() {
             </div>
           </div>
 
-          {/* Khối diễn giải và khuyến nghị chính sách */}
-          <div style={{ backgroundColor: '#161a25', border: '1px solid #232936', borderTop: '4px solid #38bdf8', borderRadius: '8px', padding: '25px' }}>
-            <h3 style={{ margin: '0 0 15px 0', fontSize: '15px', color: '#fff' }}>💡 Diễn giải & Hàm ý chính sách Governance</h3>
-            <div style={{ fontSize: '13.5px', color: '#94a3b8', lineHeight: '1.7' }}>
-              <p><b>1. Phân tích nhóm Top-3 ưu tiên chiến lược:</b><br />
-              Tùy thuộc vào bộ trọng số Đạt lựa chọn, thứ tự Top-3 ngành dẫn đầu sẽ dịch chuyển một cách rõ rệt. Khi áp dụng bộ trọng số mặc định hoặc định hướng tăng trưởng, ngành <b>Công nghiệp chế biến, chế tạo</b> và <b>CNTT-Truyền thông</b> thường chiếm giữ ngôi vương nhờ quy mô xuất khẩu khổng lồ và hệ số lan tỏa chuỗi cung ứng cực lớn, hoàn toàn đồng điệu với định hướng đổi mới mô hình tăng trưởng của Nghị quyết số 57-NQ/TW[cite: 167, 168, 206, 207]. Ngược lại, kịch bản bao trùm xã hội sẽ đẩy ngành <b>Nông-Lâm-Thủy sản</b> lên cao hơn nhằm bảo vệ an sinh cho khối lượng lớn lao động phổ thông[cite: 167, 175].</p>
-              
-              <p style={{ marginTop: '15px' }}><b>2. Nghịch lý ngành Khai khoáng:</b><br />
-              Mô hình toán học đã giải thích thành công một thực tế quản trị vĩ mô: Dù ngành Khai khoáng sở hữu năng suất lao động thô ở mức cao nhất sàn (1.290,5 triệu VND/người), ngành này vẫn đứng ở top dưới về mức độ ưu tiên công nghệ số[cite: 167, 208]. Nguyên nhân là do hệ số lan tỏa công nghệ sang các khu vực kinh tế khác rất thấp (0.30), tỷ suất giải quyết việc làm kém và mang rủi ro tự động hóa cao (55%)[cite: 167, 208].</p>
+          {/* 3.5. Câu hỏi thảo luận chính sách */}
+          <div style={{ backgroundColor: '#0f172a', border: '1px solid #38bdf8', borderRadius: '8px', padding: '25px', marginTop: '20px' }}>
+            <h3 style={{ fontSize: '16px', color: '#38bdf8', marginBottom: '15px', fontWeight: 'bold', textTransform: 'uppercase' }}>🏛️ 3.5. Thảo luận chính sách (Governance)</h3>
+            
+            <div style={{ fontSize: '13.5px', color: '#cbd5e1', lineHeight: '1.7' }}>
+              <div style={{ marginBottom: '15px' }}>
+                <b style={{ color: '#fff' }}>a) Theo kết quả của em, ba ngành nào nên được ưu tiên đẩy mạnh chuyển đổi số và AI trước? Kết quả này có phù hợp với Nghị quyết 57-NQ/TW không?</b>
+                <p style={{ marginTop: '5px' }}>Dựa trên kết quả mô hình tính toán đa tiêu chí (với bộ trọng số mặc định), ba ngành dẫn đầu bảng xếp hạng Priority là: <b>(1) Công nghiệp chế biến chế tạo</b>, <b>(2) CNTT-Truyền thông</b>, và <b>(3) Tài chính-Ngân hàng</b>. <br/>
+                Kết quả này hoàn toàn <b>nhất quán và phù hợp</b> với tinh thần của Nghị quyết 57-NQ/TW. Việc ưu tiên vốn mồi công nghệ vào nhóm này sẽ giúp đẩy nhanh dịch chuyển mô hình tăng trưởng từ thâm dụng lao động phổ thông sang nền kinh tế tri thức, thúc đẩy đổi mới sáng tạo và tham gia sâu vào chuỗi giá trị toàn cầu.</p>
+              </div>
+
+              <div style={{ marginBottom: '15px' }}>
+                <b style={{ color: '#fff' }}>b) Tại sao ngành Khai khoáng có năng suất rất cao nhưng vẫn không nằm trong nhóm ưu tiên?</b>
+                <p style={{ marginTop: '5px' }}>Đây là một minh chứng của mô hình định lượng đa mục tiêu. Dù Khai khoáng có năng suất lao động thô cực kỳ cao, nhưng ngành này lại có <b>hệ số lan tỏa (Spillover) rất thấp</b>, mức độ tạo việc làm kém, tăng trưởng có xu hướng âm và rủi ro bị thay thế bởi tự động hóa cao. Do đó, việc đầu tư tài khóa công vào một ngành khép kín, hữu hạn sẽ không mang lại hiệu ứng thặng dư lan tỏa cho cấu trúc của toàn bộ nền kinh tế.</p>
+              </div>
+
+              <div>
+                <b style={{ color: '#fff' }}>c) Bộ trọng số nên do ai quyết định: chuyên gia kỹ thuật, hội đồng chính sách, hay quy trình đối thoại công khai? Hãy thảo luận trên góc độ governance và tính chính danh chính sách.</b>
+                <p style={{ marginTop: '5px', marginBottom: '0' }}>Trên lăng kính quản trị công (Governance), bộ trọng số quyết định phân bổ nguồn lực quốc gia không nên bị độc quyền bởi một nhóm đơn lẻ. Mô hình lý tưởng phải là sự kết hợp đa tầng: <br/>
+                • <b>Chuyên gia kỹ thuật:</b> Thiết lập khung toán học, lượng hóa số liệu dựa trên thực chứng.<br/>
+                • <b>Hội đồng chính sách:</b> Điều tiết để trọng số không đi lệch khỏi mục tiêu vĩ mô của nhà nước.<br/>
+                • <b>Quy trình đối thoại công khai (Public Consultation):</b> Đảm bảo minh bạch, thu thập phản biện từ đại diện các ngành. Sự công khai này chính là chìa khóa tạo ra <b>tính chính danh (legitimacy)</b>, giúp chính sách nhận được sự đồng thuận cao nhất khi thực thi.</p>
+              </div>
             </div>
           </div>
+          
         </>
       )}
     </div>

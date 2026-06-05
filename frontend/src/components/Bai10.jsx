@@ -3,236 +3,260 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 
 export default function Bai10() {
   const [inputs, setInputs] = useState({
-    budget_stage1: 65000,
-    budget_stage2: 15000
+    budget_first: 65000,
+    budget_second: 15000,
+    ai_h_ratio: 0.5
   });
 
   const [resData, setResData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isCalculated, setIsCalculated] = useState(false);
-  const [hasError, setHasError] = useState(false);
 
-  const runStochasticOptimization = () => {
+  const handleInputChange = (field, val) => {
+    setInputs(prev => ({ ...prev, [field]: parseFloat(val) || 0 }));
+  };
+
+  const calculateStochastic = () => {
     setLoading(true);
-    setHasError(false);
-    setIsCalculated(false);
-    setResData(null);
-
-    fetch('http://localhost:8000/api/bai10/optimize', {
+    fetch('http://localhost:8000/api/bai10/calculate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(inputs)
     })
-    .then(res => {
-      if (!res.ok) throw new Error("Cổng Backend Bài 10 không phản hồi");
-      return res.json();
-    })
-    .then(data => {
-      if (data && data.success) {
-        setResData(data);
-        setIsCalculated(true);
-      } else {
-        setIsCalculated(false);
-        setHasError(true);
-      }
-      setLoading(false);
-    })
-    .catch(err => {
-      console.error("Lỗi liên thông API Bài 10:", err);
-      setLoading(false);
-      setHasError(true);
-      setIsCalculated(false);
-    });
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.success) {
+          setResData(data);
+          setIsCalculated(true);
+        } else {
+          alert("Lỗi mô hình quy hoạch ngẫu nhiên.");
+        }
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Lỗi:", err);
+        setLoading(false);
+      });
   };
 
-  // 💡 HÀM PHÒNG VỆ AN TOÀN: Ép kiểu dữ liệu số an toàn trước khi định dạng chuỗi hiển thị
-  const safeFormat = (val) => {
-    if (val === undefined || val === null || isNaN(val)) return "0";
-    return val.toLocaleString();
+  const formatSmart = (num) => {
+    if (num === undefined || num === null) return "--";
+    return Number(num).toLocaleString('vi-VN', { maximumFractionDigits: 4 });
   };
 
   return (
-    <div style={{ color: '#ffffff', maxWidth: '1400px', margin: '0 auto', paddingBottom: '30px' }}>
+    <div style={{ color: '#ffffff', maxWidth: '1400px', margin: '0 auto', paddingBottom: '30px', fontFamily: 'sans-serif' }}>
       
-      {/* Tiêu đề phân hệ */}
+      {/* Tiêu đề trang */}
       <div style={{ marginBottom: '25px' }}>
-        <h1 style={{ fontSize: '24px', margin: '0 0 5px 0', fontWeight: 'bold' }}>BÀI 10 — QUY HOẠCH NGẪU NHIÊN DƯỚI BẤT ĐỊNH KINH TẾ TOÀN CẦU</h1>
+        <h1 style={{ fontSize: '24px', fontWeight: 'bold', textTransform: 'uppercase' }}>BÀI 10 - QUY HOẠCH NGẪU NHIÊN HAI GIAI ĐOẠN DƯỚI BẤT ĐỊNH</h1>
       </div>
 
-      {/* Cơ sở lý thuyết toán kinh tế */}
-      <div style={{ backgroundColor: '#161a25', border: '1px solid #232936', borderRadius: '8px', padding: '20px', marginBottom: '25px' }}>
-        <div style={{ fontSize: '14px', color: '#aaa', marginBottom: '8px' }}><b>Hệ hoạch định tối ưu phân tầng (Two-Stage Stochastic Optimization Framework)</b></div>
-        <div style={{ fontSize: '16px', color: '#34d399', fontWeight: 'bold', fontFamily: 'monospace' }}>
-          Min c'x + Tong [ p_s x Q(x, s) ] | Ràng buộc kỹ thuật: y_AI_s &lt;= 0.5 x x_H
+      {/* Mô hình toán học */}
+      <div style={{ backgroundColor: '#161a25', border: '1px solid #232936', borderTop: '3px solid #38bdf8', borderRadius: '8px', padding: '20px', marginBottom: '25px' }}>
+        <h3 style={{ margin: '0 0 15px 0', fontSize: '15px', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '16px' }}>🔀</span> Mô hình toán học
+        </h3>
+        <div style={{ backgroundColor: '#0f172a', padding: '15px 20px', borderRadius: '6px', overflowX: 'auto', marginBottom: '12px' }}>
+          <p style={{ fontFamily: '"Times New Roman", Times, serif', fontSize: '26px', color: '#cbd5e1', margin: 0, whiteSpace: 'nowrap', letterSpacing: '0.5px' }}>
+            <b style={{ color: '#fff' }}>Max &Sigma;<sub>j</sub>&beta;<sub>j</sub>x<sub>j</sub> + &Sigma;<sub>s</sub>p<sub>s</sub>&Sigma;<sub>j</sub>&beta;<sub>j</sub><sup>s</sup>y<sub>j</sub><sup>s</sup></b>
+          </p>
         </div>
-        <p style={{ fontSize: '12.5px', color: '#94a3b8', margin: '6px 0 0 0', lineHeight: '1.5' }}>
-          Mô hình hóa chu trình phân bổ tài khóa công dưới tác động đa kịch bản (Scenario Tree) từ thị trường quốc tế. Quyết định Giai đoạn 1 (Here-and-now) khóa cứng dòng vốn mồi, Giai đoạn 2 (Recourse) linh hoạt giải ngân gói dự phòng điều chỉnh biến động.
+        <p style={{ margin: 0, fontSize: '13px', color: '#94a3b8', lineHeight: '1.6' }}>
+          Mô hình gồm quyết định first-stage x<sub>j</sub> trước khi biết kịch bản và quyết định second-stage y<sub>j</sub><sup>s</sup> sau khi kịch bản xảy ra. Ràng buộc quan trọng: y<sub>AI</sub><sup>s</sup> &le; 0,5x<sub>H</sub>.
         </p>
       </div>
 
-      {/* Thiết lập tham số vĩ mô đầu vào */}
-      <div style={{ backgroundColor: '#161a25', border: '1px solid #232936', borderRadius: '8px', padding: '20px', marginBottom: '30px' }}>
-        <h3 style={{ margin: '0 0 15px 0', fontSize: '15px', color: '#38bdf8', borderBottom: '1px solid #232936', paddingBottom: '10px' }}>🎛️ Thiết lập Quy mô Quỹ tài khóa dự phòng ngân sách</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-          <div>
-            <label style={{ fontSize: '11px', color: '#aaa' }}>Ngân sách Giai đoạn 1 cứng (tỷ VND)</label>
-            <input type="number" value={inputs.budget_stage1} onChange={e => setInputs({...inputs, budget_stage1: parseFloat(e.target.value)||0})} style={{ width: '100%', backgroundColor: '#0e1117', color: '#fff', border: '1px solid #232936', padding: '8px', borderRadius: '4px', marginTop: '4px' }} />
-          </div>
-          <div>
-            <label style={{ fontSize: '11px', color: '#aaa' }}>Ngân sách Dự phòng Giai đoạn 2 tối đa (tỷ VND)</label>
-            <input type="number" value={inputs.budget_stage2} onChange={e => setInputs({...inputs, budget_stage2: parseFloat(e.target.value)||0})} style={{ width: '100%', backgroundColor: '#0e1117', color: '#fff', border: '1px solid #232936', padding: '8px', borderRadius: '4px', marginTop: '4px' }} />
-          </div>
+      {/* 4 Khối KPI */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '15px', marginBottom: '25px' }}>
+        <div style={{ backgroundColor: '#0891b2', padding: '20px', borderRadius: '6px' }}>
+          <h2 style={{ fontSize: '30px', margin: '0 0 5px 0', fontWeight: 'bold' }}>{resData ? formatSmart(resData.sp_value) : '--'}</h2>
+          <p style={{ margin: 0, fontSize: '14px', color: '#e0f2fe' }}>Giá trị SP</p>
         </div>
-        <button onClick={runStochasticOptimization} disabled={loading} style={{ backgroundColor: '#2563eb', color: '#fff', border: 'none', padding: '12px 25px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', display: 'block', width: '200px' }}>
-          {loading ? '⏳ Đang giải Stochastic...' : '▶️ Chạy mô hình'}
-        </button>
+        <div style={{ backgroundColor: '#16a34a', padding: '20px', borderRadius: '6px' }}>
+          <h2 style={{ fontSize: '30px', margin: '0 0 5px 0', fontWeight: 'bold' }}>{resData ? formatSmart(resData.vss) : '--'}</h2>
+          <p style={{ margin: 0, fontSize: '14px', color: '#d1fae5' }}>VSS</p>
+        </div>
+        <div style={{ backgroundColor: '#eab308', padding: '20px', borderRadius: '6px' }}>
+          <h2 style={{ fontSize: '30px', margin: '0 0 5px 0', fontWeight: 'bold', color: '#1e293b' }}>{resData ? formatSmart(resData.evpi) : '--'}</h2>
+          <p style={{ margin: 0, fontSize: '14px', color: '#475569' }}>EVPI</p>
+        </div>
+        <div style={{ backgroundColor: '#dc2626', padding: '20px', borderRadius: '6px' }}>
+          <h2 style={{ fontSize: '30px', margin: '0 0 5px 0', fontWeight: 'bold' }}>{resData ? formatSmart(resData.max_regret) : '--'}</h2>
+          <p style={{ margin: 0, fontSize: '14px', color: '#fee2e2' }}>Regret xấu nhất</p>
+        </div>
       </div>
 
-      {hasError && (
-        <div style={{ color: '#f43f5e', padding: '15px', backgroundColor: '#2d141a', borderRadius: '6px', marginBottom: '20px', fontWeight: 'bold' }}>
-          ⚠️ Lỗi cấu trúc phản hồi từ mạng Backend. Hãy đảm bảo Backend bài 10 trả về đúng các trường dữ liệu số.
+      {/* Dòng 1: Form & Chart First-stage */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 2.8fr', gap: '20px', marginBottom: '25px' }}>
+        <div style={{ backgroundColor: '#161a25', border: '1px solid #232936', borderRadius: '8px', padding: '20px' }}>
+          <h3 style={{ margin: '0 0 15px 0', fontSize: '14px', color: '#38bdf8', fontWeight: '600' }}>Tham số mô hình</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <div>
+              <label style={{ fontSize: '12px', color: '#fff', fontWeight: 'bold' }}>Ngân sách first-stage, tỷ VND</label>
+              <input type="number" value={inputs.budget_first} onChange={e => handleInputChange('budget_first', e.target.value)} style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #334155', backgroundColor: '#fff', color: '#000', marginTop: '4px' }} />
+            </div>
+            <div>
+              <label style={{ fontSize: '12px', color: '#fff', fontWeight: 'bold' }}>Ngân sách second-stage mỗi kịch bản, tỷ VND</label>
+              <input type="number" value={inputs.budget_second} onChange={e => handleInputChange('budget_second', e.target.value)} style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #334155', backgroundColor: '#fff', color: '#000', marginTop: '4px' }} />
+            </div>
+            <div>
+              <label style={{ fontSize: '12px', color: '#fff', fontWeight: 'bold' }}>Ràng buộc AI theo nhân lực: y_AI &le; ratio &times; x_H</label>
+              <input type="number" step="0.1" value={inputs.ai_h_ratio} onChange={e => handleInputChange('ai_h_ratio', e.target.value)} style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #334155', backgroundColor: '#fff', color: '#000', marginTop: '4px' }} />
+            </div>
+          </div>
+          <button onClick={calculateStochastic} disabled={loading} style={{ width: '100%', marginTop: '20px', backgroundColor: '#0284c7', color: '#fff', border: 'none', padding: '10px', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>
+            {loading ? '⏳ Đang phân tích kịch bản...' : '▶ Chạy mô hình stochastic'}
+          </button>
         </div>
-      )}
 
-      {!isCalculated ? (
-        <div style={{ textAlign: 'center', padding: '40px', backgroundColor: '#161a25', borderRadius: '8px', border: '1px dashed #232936', color: '#64748b' }}>
-          💡 Vui lòng nhấp nút <b>"Chạy mô hình"</b> để kích hoạt bộ thuật toán Scenario Decomposition vĩ mô.
+        <div style={{ backgroundColor: '#161a25', border: '1px solid #232936', borderRadius: '8px', padding: '20px' }}>
+          <h4 style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '20px' }}>So sánh quyết định first-stage</h4>
+          <div style={{ width: '100%', height: 320 }}>
+            <ResponsiveContainer>
+              <BarChart data={resData?.first_stage_table || []}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#232936" vertical={false} />
+                <XAxis dataKey="item" stroke="#94a3b8" fontSize={12} />
+                <YAxis stroke="#94a3b8" fontSize={12} label={{ value: 'Ngân sách first stage, tỷ VND', angle: -90, position: 'insideLeft', fill: '#94a3b8' }} />
+                <Tooltip contentStyle={{ backgroundColor: '#161a25', color: '#fff', border: '1px solid #334155' }} />
+                <Legend verticalAlign="top" height={36} />
+                <Bar dataKey="sp" fill="#93c5fd" name="SP" barSize={35} />
+                <Bar dataKey="ev" fill="#fca5a5" name="EV" barSize={35} />
+                <Bar dataKey="robust" fill="#fdba74" name="Robust" barSize={35} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
-      ) : (
+      </div>
+
+      {isCalculated && resData && (
         <>
-          {/* Cụm Thẻ Chỉ số KPI đo lường VSS & EVPI */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', marginBottom: '25px' }}>
-            <div style={{ backgroundColor: '#1e293b', borderLeft: '4px solid #38bdf8', padding: '20px', borderRadius: '8px' }}>
-              <span style={{ color: '#aaa', fontSize: '12px' }}>Dự toán GDP Kỳ vọng tối ưu</span>
-              <h2 style={{ fontSize: '26px', margin: '5px 0 0 0', fontWeight: 'bold', color: '#34d399' }}>
-                {safeFormat(resData?.expected_gdp_opt)} tỷ
-              </h2>
-            </div>
-            <div style={{ backgroundColor: '#1e293b', borderLeft: '4px solid #a855f7', padding: '20px', borderRadius: '8px' }}>
-              <span style={{ color: '#aaa', fontSize: '12px' }}>Giá trị giải pháp ngẫu nhiên (VSS)</span>
-              <h2 style={{ fontSize: '26px', margin: '5px 0 0 0', fontWeight: 'bold', color: '#ffbb28' }}>
-                {safeFormat(resData?.vss)} tỷ
-              </h2>
-            </div>
-            <div style={{ backgroundColor: '#1e293b', borderLeft: '4px solid #ef4444', padding: '20px', borderRadius: '8px' }}>
-              <span style={{ color: '#aaa', fontSize: '12px' }}>Giá trị thông tin hoàn hảo (EVPI)</span>
-              <h2 style={{ fontSize: '26px', margin: '5px 0 0 0', fontWeight: 'bold', color: '#f43f5e' }}>
-                {safeFormat(resData?.evpi)} tỷ
-              </h2>
-            </div>
-          </div>
-
-          {/* Đồ thị trực quan hóa cơ cấu điều chỉnh dòng tiền */}
-          <div style={{ backgroundColor: '#161a25', border: '1px solid #232936', borderRadius: '8px', padding: '20px', marginBottom: '25px' }}>
-            <h4 style={{ margin: '0 0 15px 0', fontSize: '14px', color: '#38bdf8' }}>📊 Đối chiếu dòng tiền ứng phó bổ sung Giai đoạn 2 theo từng Kịch bản</h4>
-            <div style={{ width: '100%', height: 300 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={resData?.second_stage_recourse || []} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#232936" />
-                  <XAxis dataKey="scenario" stroke="#94a3b8" />
-                  <YAxis stroke="#94a3b8" />
-                  <Tooltip contentStyle={{ backgroundColor: '#161a25', color: '#fff' }} />
-                  <Legend />
-                  <Bar dataKey="I" fill="#2563eb" name="Bổ sung Hạ tầng vật chất (I)" />
-                  <Bar dataKey="D" fill="#38bdf8" name="Bổ sung Hạ tầng số (D)" />
-                  <Bar dataKey="AI" fill="#34d399" name="Bổ sung Trí tuệ nhân tạo (AI)" />
-                  <Bar dataKey="H" fill="#a855f7" name="Bổ sung Vốn nhân lực (H)" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Bảng phân bổ chi tiết kết quả tối ưu đầu ra */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.8fr', gap: '20px', marginBottom: '25px' }}>
-            
-            <div style={{ backgroundColor: '#161a25', border: '1px solid #232936', borderRadius: '8px', padding: '20px' }}>
-              <h4 style={{ margin: '0 0 15px 0', fontSize: '14px', color: '#fff' }}>🎯 Quyết định khóa cứng Giai đoạn 1 (Here-and-Now)</h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div style={{ display: 'flex', padding: '10px', backgroundColor: '#0e1117', borderRadius: '4px' }}>
-                  <span style={{ color: '#aaa' }}>Hạ tầng vật chất (x_I):</span>
-                  <span style={{ fontWeight: 'bold', color: '#2563eb', marginLeft: 'auto' }}>{safeFormat(resData?.first_stage_allocation?.I)} tỷ</span>
-                </div>
-                <div style={{ display: 'flex', padding: '10px', backgroundColor: '#0e1117', borderRadius: '4px' }}>
-                  <span style={{ color: '#aaa' }}>Hạ tầng kỹ thuật số (x_D):</span>
-                  <span style={{ fontWeight: 'bold', color: '#38bdf8', marginLeft: 'auto' }}>{safeFormat(resData?.first_stage_allocation?.D)} tỷ</span>
-                </div>
-                <div style={{ display: 'flex', padding: '10px', backgroundColor: '#0e1117', borderRadius: '4px' }}>
-                  <span style={{ color: '#aaa' }}>Trí tuệ nhân tạo (x_AI):</span>
-                  <span style={{ fontWeight: 'bold', color: '#34d399', marginLeft: 'auto' }}>{safeFormat(resData?.first_stage_allocation?.AI)} tỷ</span>
-                </div>
-                <div style={{ display: 'flex', padding: '10px', backgroundColor: '#0e1117', borderRadius: '4px' }}>
-                  <span style={{ color: '#aaa' }}>Vốn nhân lực chất lượng (x_H):</span>
-                  <span style={{ fontWeight: 'bold', color: '#a855f7', marginLeft: 'auto' }}>{safeFormat(resData?.first_stage_allocation?.H)} tỷ</span>
-                </div>
-              </div>
-            </div>
-
+          {/* Dòng 2: Cấu trúc kịch bản & Value Chart */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 2.8fr', gap: '20px', marginBottom: '25px' }}>
             <div style={{ backgroundColor: '#161a25', border: '1px solid #232936', borderRadius: '8px', padding: '20px', overflowX: 'auto' }}>
-              <h4 style={{ margin: '0 0 15px 0', fontSize: '14px', color: '#fff' }}>📋 Bảng dữ liệu quỹ điều chỉnh Giai đoạn 2 (Recourse)</h4>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px', textAlign: 'center' }}>
+              <h4 style={{ fontSize: '14px', color: '#38bdf8', marginBottom: '15px' }}>Cấu trúc kịch bản</h4>
+              <table style={{ width: '100%', fontSize: '13px', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead>
-                  <tr style={{ borderBottom: '2px solid #232936', color: '#94a3b8' }}>
-                    <th style={{ padding: '8px', textAlign: 'left' }}>Kịch bản vĩ mô</th>
-                    <th style={{ padding: '8px' }}>y_I (tỷ)</th>
-                    <th style={{ padding: '8px' }}>y_D (tỷ)</th>
-                    <th style={{ padding: '8px' }}>y_AI (tỷ)</th>
-                    <th style={{ padding: '8px' }}>y_H (tỷ)</th>
+                  <tr style={{ borderBottom: '2px solid #232936', color: '#94a3b8', backgroundColor: '#0f172a' }}>
+                    <th style={{ padding: '10px' }}>Kịch bản</th>
+                    <th style={{ padding: '10px' }}>TG %</th>
+                    <th style={{ padding: '10px' }}>FDI</th>
+                    <th style={{ padding: '10px' }}>Xuất khẩu %</th>
+                    <th style={{ padding: '10px' }}>Xác suất</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {(resData?.second_stage_recourse || []).map((row, idx) => (
-                    <tr key={idx} style={{ borderBottom: '1px solid #232936' }}>
-                      <td style={{ padding: '10px', textAlign: 'left', fontWeight: 'bold' }}>{row.scenario}</td>
-                      <td style={{ color: '#2563eb' }}>{row.I}</td>
-                      <td style={{ color: '#38bdf8' }}>{row.D}</td>
-                      <td style={{ color: '#34d399' }}>{row.AI}</td>
-                      <td style={{ color: '#a855f7' }}>{row.H}</td>
+                  {(resData.scenarios || []).map((row, i) => (
+                    <tr key={i} style={{ borderBottom: '1px solid #232936', color: '#cbd5e1' }}>
+                      <td style={{ padding: '10px' }}>{row.name}</td>
+                      <td style={{ padding: '10px' }}>{row.tg}</td>
+                      <td style={{ padding: '10px' }}>{row.fdi}</td>
+                      <td style={{ padding: '10px' }}>{row.export}</td>
+                      <td style={{ padding: '10px' }}>{row.prob}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
 
+            <div style={{ backgroundColor: '#161a25', border: '1px solid #232936', borderRadius: '8px', padding: '20px' }}>
+              <h4 style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '20px' }}>So sánh SP - EV - EEV - WS</h4>
+              <div style={{ width: '100%', height: 260 }}>
+                <ResponsiveContainer>
+                  <BarChart data={resData.value_chart || []}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#232936" vertical={false} />
+                    <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} />
+                    <YAxis stroke="#94a3b8" fontSize={12} domain={[0, 100000]} label={{ value: 'Giá trị kỳ vọng', angle: -90, position: 'insideLeft', fill: '#94a3b8' }} />
+                    <Tooltip contentStyle={{ backgroundColor: '#161a25', color: '#fff', border: '1px solid #334155' }} formatter={(val) => [formatSmart(val), "Giá trị mục tiêu"]} />
+                    <Legend verticalAlign="top" height={36} />
+                    <Bar dataKey="value" fill="#93c5fd" name="Giá trị mục tiêu" barSize={70} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
           </div>
 
-          {/* 🏛️ KHỐI LUẬN CỨ CHÍNH SÁCH VĨ MÔ 10.6 CHI TIẾT THEO YÊU CẦU */}
-          <div style={{ backgroundColor: '#161a25', border: '1px solid #232936', borderTop: '4px solid #38bdf8', borderRadius: '8px', padding: '25px', marginTop: '25px' }}>
-            <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold' }}>
-              🏛️ 10.6. Hệ thống Luận cứ & Thảo luận Định hướng Tối ưu hóa Ngẫu nhiên vĩ mô
+          {/* Dòng 3: Recourse Chart & Bảng Quyết định */}
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.5fr', gap: '20px', marginBottom: '25px' }}>
+            <div style={{ backgroundColor: '#161a25', border: '1px solid #232936', borderRadius: '8px', padding: '20px' }}>
+              <h4 style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '20px' }}>Second-stage recourse của lời giải SP</h4>
+              <div style={{ width: '100%', height: 320 }}>
+                <ResponsiveContainer>
+                  <BarChart data={resData.recourse_chart || []}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#232936" vertical={false} />
+                    <XAxis dataKey="scenario" stroke="#94a3b8" fontSize={12} />
+                    <YAxis stroke="#94a3b8" fontSize={12} label={{ value: 'Ngân sách recourse, tỷ VND', angle: -90, position: 'insideLeft', fill: '#94a3b8' }} />
+                    <Tooltip contentStyle={{ backgroundColor: '#161a25', color: '#fff', border: '1px solid #334155' }} />
+                    <Legend verticalAlign="top" height={36} />
+                    <Bar dataKey="y_I" stackId="a" fill="#93c5fd" name="Hạ tầng số" barSize={55} />
+                    <Bar dataKey="y_D" stackId="a" fill="#fca5a5" name="Chuyển đổi số" />
+                    <Bar dataKey="y_AI" stackId="a" fill="#fdba74" name="Trí tuệ nhân tạo" />
+                    <Bar dataKey="y_H" stackId="a" fill="#fde047" name="Nhân lực số" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div style={{ backgroundColor: '#161a25', border: '1px solid #232936', borderRadius: '8px', padding: '20px', overflowX: 'auto' }}>
+              <h4 style={{ fontSize: '14px', color: '#38bdf8', marginBottom: '15px' }}>Bảng quyết định first-stage</h4>
+              <table style={{ width: '100%', fontSize: '13px', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid #232936', color: '#94a3b8', backgroundColor: '#0f172a' }}>
+                    <th style={{ padding: '10px' }}>Hạng mục</th>
+                    <th style={{ padding: '10px' }}>SP</th>
+                    <th style={{ padding: '10px' }}>EV</th>
+                    <th style={{ padding: '10px' }}>Robust</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(resData.first_stage_table || []).map((row, i) => (
+                    <tr key={i} style={{ borderBottom: '1px solid #232936', color: '#cbd5e1' }}>
+                      <td style={{ padding: '10px', fontWeight: '500' }}>{row.item}</td>
+                      <td style={{ padding: '10px' }}>{formatSmart(row.sp)}</td>
+                      <td style={{ padding: '10px' }}>{formatSmart(row.ev)}</td>
+                      <td style={{ padding: '10px' }}>{formatSmart(row.robust)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* 10.6 Nhận xét và hàm ý chính sách */}
+          <div style={{ backgroundColor: '#0f172a', border: '1px solid #38bdf8', borderRadius: '8px', padding: '25px', marginBottom: '25px' }}>
+            <h3 style={{ fontSize: '16px', color: '#38bdf8', marginBottom: '20px', fontWeight: 'bold', textTransform: 'uppercase' }}>
+              🏛️ 10.6. Nhận xét và Hàm ý chính sách (Quy hoạch ngẫu nhiên)
             </h3>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', fontSize: '13.5px', color: '#94a3b8', lineHeight: '1.7' }}>
+            <div style={{ fontSize: '13.5px', color: '#cbd5e1', lineHeight: '1.8' }}>
               
-              {/* Câu a */}
-              <div style={{ backgroundColor: '#0f172a', padding: '15px', borderRadius: '6px', border: '1px solid #232936' }}>
-                <h5 style={{ margin: '0 0 8px 0', color: '#38bdf8', fontSize: '14px', fontWeight: 'bold' }}>
-                  a) Xu hướng phân bổ vốn nhân lực (H) giữa lời giải ngẫu nhiên (SP) và lời giải xác định (Deterministic)
-                </h5>
-                <p style={{ margin: 0 }}>
-                  • <b>Xu hướng đầu tư:</b> Lời giải quy hoạch ngẫu nhiên SP có xu hướng <b>đầu tư vào vốn nhân lực (H) nhiều hơn rõ rệt</b> so với lời giải xác định dựa trên kịch bản trung bình.<br />
-                  • <b>Nguyên nhân kinh tế học:</b> Trong mô hình xác định, hệ thống thiên vị dồn toàn lực vào các hạng mục có tỷ suất sinh lợi biên cao tức thời (như AI, Hạ tầng số). Tuy nhiên, trong mô hình ngẫu nhiên SP, sự xuất hiện của ràng buộc trần năng lực công nghệ ở giai đoạn hai (y_AI_s &lt;= 0.5 * x_H) đã ép thuật toán phải nhìn xa hơn. Nếu Chính phủ không đầu tư vốn mồi cho con người ngay từ giai đoạn một (Here-and-now), thì khi tương lai mở ra kịch bản Lạc quan (s1), nền kinh tế sẽ bị rơi vào hiệu ứng <b>nghẽn năng lực hấp thụ (Absorptive Capacity)</b> — tức là có sẵn vốn dự phòng nhưng không thể giải ngân mua sắm thiết bị AI do thiếu hụt trầm trọng kỹ sư vận hành. Đầu tư sớm vào H đóng vai trò như một <b> quyền chọn chiến lược (Call Option)</b> mua sự linh hoạt cho tương lai.
+              <div style={{ marginBottom: '20px' }}>
+                <b style={{ color: '#fff', fontSize: '14.5px', display: 'block', marginBottom: '6px' }}>
+                  a) So với lời giải xác định, lời giải SP có xu hướng đầu tư H nhiều hơn hay ít hơn? Vì sao?
+                </b>
+                <p style={{ marginTop: '5px', textAlign: 'justify' }}>
+                  <b>Xu hướng đầu tư:</b> Lời giải Quy hoạch ngẫu nhiên (SP) luôn có xu hướng phân bổ ngân sách cho Nhân lực số (H) <b>nhiều hơn và kiên định hơn</b> so với lời giải xác định (EV) dựa trên kịch bản trung bình.<br />
+                  <b>Nguyên nhân:</b> Lời giải xác định (EV) chỉ nhìn thấy một tương lai trung bình yên bình, do đó nó bị hấp dẫn bởi lợi nhuận ngắn hạn và vắt kiệt ngân sách vào hệ thống máy móc, hạ tầng công nghệ lõi (K, AI). Ngược lại, mô hình ngẫu nhiên (SP) tối ưu hóa trên mọi kịch bản, bao gồm cả rủi ro khủng hoảng cực đoan. Khi kịch bản xấu xảy ra, máy móc và công nghệ vật lý trở thành "chi phí chìm" không thể tự xoay xở. Chỉ có Vốn nhân lực (H) mới tạo ra <i>"Tính linh hoạt bù đắp" (Recourse Flexibility)</i>, cho phép nền kinh tế chuyển đổi công năng và gượng dậy. Do đó, thuật toán SP tự động "mua bảo hiểm" bằng cách tăng dự trữ vốn con người ngay từ Giai đoạn 1 (First-stage).
                 </p>
               </div>
 
-              {/* Câu b */}
-              <div style={{ backgroundColor: '#0f172a', padding: '15px', borderRadius: '6px', border: '1px solid #232936' }}>
-                <h5 style={{ margin: '0 0 8px 0', color: '#34d399', fontSize: '14px', fontWeight: 'bold' }}>
-                  b) Ý nghĩa kinh tế của chỉ số VSS (Value of Stochastic Solution) mang giá trị dương
-                </h5>
-                <p style={{ margin: 0 }}>
-                  • <b>Bản chất chỉ số:</b> Chỉ số VSS mang giá trị dương lớn chứng minh định lượng rằng <b>việc chủ động cân nhắc và nhúng yếu tố xác suất/bất định vào mô hình hoạch định chính sách đem lại phúc lợi xã hội lớn hơn hẳn tư duy kịch bản trung bình</b>.<br />
-                  • <b>Hàm ý chính sách Việt Nam:</b> Kinh tế Việt Nam có độ mở thương mại lớn (~180% GDP). Nếu các nhà hoạch định chính sách điều hành quốc gia bằng "tư duy kịch bản trung bình cơ sở", chúng ta sẽ liên tục rơi vào trạng thái bị động: hoặc bị thiếu hụt nguồn lực trầm trọng khi thời cơ vàng (Lạc quan s1) bùng nổ, hoặc bị lãng phí, sập cấu trúc tài khóa do phân bổ quá đà khi khủng hoảng (s4) quét qua. VSS dương là lời khẳng định khoa học: tư duy quản trị rủi ro ngẫu nhiên phải là bộ công cụ bắt buộc trong kỷ nguyên số hóa nhiều biến động địa chính trị.
+              <div style={{ marginBottom: '20px' }}>
+                <b style={{ color: '#fff', fontSize: '14.5px', display: 'block', marginBottom: '6px' }}>
+                  b) VSS dương nói lên điều gì về giá trị của tư duy xác suất trong hoạch định chính sách Việt Nam?
+                </b>
+                <p style={{ marginTop: '5px', textAlign: 'justify' }}>
+                  <b>Bản chất của VSS:</b> Giá trị của giải pháp ngẫu nhiên (VSS &gt; 0) đo lường chính xác bằng tiền <b>khoản thiệt hại kinh tế khổng lồ</b> mà quốc gia sẽ phải gánh chịu nếu chỉ nhắm mắt lập kế hoạch dựa trên một dự báo "cơ sở" duy nhất.<br />
+                  <b>Hàm ý hoạch định:</b> Con số này là minh chứng toán học cho thấy tư duy lập kế hoạch 5 năm tuyến tính cứng nhắc (Deterministic Planning) đã lỗi thời trong kỷ nguyên VUCA (Biến động, Bất định, Phức tạp, Mơ hồ). Tư duy xác suất đòi hỏi Chính phủ không bao giờ được "bỏ tất cả trứng vào một giỏ kịch bản". Thay vào đó, phải xây dựng các chính sách có độ chống chịu cao (Robustness) đa nhánh và luôn thiết kế sẵn các gói ngân sách dự phòng (Second-stage recourse) để sẵn sàng kích hoạt ngay khi bối cảnh kinh tế vĩ mô đảo chiều.
                 </p>
               </div>
 
-              {/* Câu c */}
-              <div style={{ backgroundColor: '#0f172a', padding: '15px', borderRadius: '6px', border: '1px solid #232936' }}>
-                <h5 style={{ margin: '0 0 8px 0', color: '#ff6b6b', fontSize: '14px', fontWeight: 'bold' }}>
-                  c) Bài học vĩ mô từ Đại dịch COVID-19, Siêu bão Yagi & Khái niệm "Hàng hóa bảo hiểm" nhân lực số
-                </h5>
-                <p style={{ margin: 0 }}>
-                  • <b>Bài học từ thực tiễn cú sốc:</b> Đại dịch COVID-19 (2020-2022) and siêu bão Yagi (2024) đã phá hủy cấu trúc hạ tầng vật chất hữu hình và làm đóng băng chuỗi cung ứng truyền thống. Nhưng trong chính tâm bão, những doanh nghiệp, cơ quan sở hữu lực lượng nhân sự có trình độ số cao đã thực hiện chuyển đổi trạng thái (Làm việc từ xa, tự động hóa quy trình, tái cấu trúc chuỗi cung ứng bằng AI) một cách ngoạn mục để hấp thụ cú sốc.<br />
-                  • <b>Định vị lại chiến lược đầu tư:</b> Mô hình ngẫu nhiên Bài 10 đã chỉ ra một sự thật: Việt Nam từ trước đến nay đang có xu hướng <b>"dưới đầu tư" (Under-investment) vào nhân lực số</b>. Chúng ta thường coi chi phí cho giáo dục, đào tạo công nghệ chất lượng cao là một khoản chi tiêu tốn kém ngắn hạn, thay vì định vị nó là một loại <b>"Hàng hóa bảo hiểm quốc gia tối cao" (Sovereign Insurance Good)</b>. Dồn vốn mồi đầu tư mạnh cho con người chính là tấm khiên phòng vệ vững chắc nhất giúp nền kinh tế duy trì tính kiên cường (Resilience), sẵn sàng đứng vững và phục hồi thần tốc trước mọi biến động chưa biết trước của thời đại.
+              <div>
+                <b style={{ color: '#fff', fontSize: '14.5px', display: 'block', marginBottom: '6px' }}>
+                  c) Bài học từ đại dịch COVID-19 và bão Yagi: Liệu Việt Nam có đang “dưới đầu tư” vào nhân lực số như một hàng hóa bảo hiểm?
+                </b>
+                <p style={{ marginTop: '5px', textAlign: 'justify', marginBottom: 0 }}>
+                  <b>Thực tiễn cú sốc:</b> Khi đại dịch COVID-19 làm đứt gãy chuỗi cung ứng vật lý, hay siêu bão Yagi (2024) tàn phá diện rộng hệ thống hạ tầng điện - đường - khu công nghiệp ở miền Bắc (Vốn K), toàn bộ cỗ máy kinh tế truyền thống bị tê liệt. Trong bối cảnh đó, chỉ những cấu phần dựa trên <b>Nhân lực số và Kinh tế tri thức</b> mới có khả năng duy trì hoạt động từ xa, đảm bảo tính liên tục của hệ thống (Business Continuity).<br />
+                  <b>Đánh giá mức đầu tư:</b> Rõ ràng Việt Nam đang <b>"dưới đầu tư" (Underinvesting) nghiêm trọng</b> vào nhân lực số. Tư duy truyền thống vẫn nhìn nhận chi phí giáo dục và đào tạo số là "chi tiêu xã hội" (Social Cost) thay vì một <b>"Hàng hóa bảo hiểm vĩ mô" (Macroeconomic Insurance Good)</b>. Bài học đắt giá rút ra là: Hạ tầng vật chất có thể bị quét sạch sau một đêm bởi thiên tai hoặc dịch bệnh, nhưng năng lực trí tuệ và kỹ năng số của con người là tài sản chống chịu rủi ro (Anti-fragile) duy nhất không thể bị phá hủy, quyết định tốc độ tái thiết quốc gia sau khủng hoảng.
                 </p>
               </div>
 

@@ -13,14 +13,14 @@ def optimize_labor_flows(data: LaborOptimizationInput):
     try:
         # 1. Khởi tạo hằng số tham số hệ thống cho 8 ngành vĩ mô quốc gia
         sector_names = [
-            "1. Nông, Lâm nghiệp & Thủy sản",
-            "2. Công nghiệp chế biến, chế tạo",
-            "3. Sản xuất & Phân phối điện, khí",
-            "4. Bán buôn & Bán lẻ, sửa chữa",
-            "5. Vận tải, kho bãi",
-            "6. Dịch vụ lưu trú & Ăn uống",
-            "7. Thông tin & Truyền thông",
-            "8. Tài chính, Ngân hàng & Bảo hiểm"
+            "Nông-Lâm-Thủy sản",
+            "CN chế biến chế tạo",
+            "Xây dựng",
+            "Bán buôn-bán lẻ",
+            "Tài chính-Ngân hàng",
+            "Logistics-Vận tải",
+            "CNTT-Truyền thông",
+            "Giáo dục-Đào tạo"
         ]
         
         N = len(sector_names)
@@ -30,25 +30,26 @@ def optimize_labor_flows(data: LaborOptimizationInput):
         beta_H = np.array([0.05, 0.25, 0.15, 0.20, 0.12, 0.10, 0.40, 0.35])
         
         # Quy mô lao động cơ sở nền tảng của từng ngành (L_i - đơn vị: nghìn người)
-        L_base = np.array([13500, 11200, 950, 7200, 3100, 2600, 1100, 850])
+        L_base = np.array([13.2, 11.5, 4.8, 7.8, 0.55, 1.95, 0.62, 2.15])  # Lao động triệu người
         
-        # Hệ số rủi ro dịch chuyển mất việc do AI (Risk_i)
-        risk_factor = np.array([0.08, 0.35, 0.20, 0.28, 0.22, 0.15, 0.48, 0.52])
+        # Hệ số rủi ro dịch chuyển mất việc do AI (Risk_i) - tính theo %
+        risk_factor = np.array([18, 42, 25, 38, 52, 35, 28, 22])  # %
 
         # 2. Thuật toán phân bổ ngân sách tối ưu (Heuristic LP Allocation)
-        # Giả định phân bổ tối ưu hóa dòng tiền dựa trên trọng số quy mô và hệ số phản hồi
+        # Allocate resources to sectors 7 (CNTT-Truyền thông) & 8 (Giáo dục-Đào tạo)
         total_B = data.total_budget
         
-        # Phân bổ cơ sở: 60% cho phân vùng phát triển AI, 40% cho quỹ an sinh đào tạo lại nhân lực (H)
-        B_AI_total = total_B * 0.60
-        B_H_total = total_B * 0.40
+        # Initialize allocation arrays for all sectors
+        x_AI = np.zeros(N)
+        x_H = np.zeros(N)
         
-        # Phân rã dòng vốn theo tỷ trọng quy mô lao động có điều chỉnh hệ số rủi ro công nghệ
-        weights = L_base * risk_factor
-        weights_norm = weights / np.sum(weights)
+        # Phân bổ cho ngành 7 (CNTT-Truyền thông) và ngành 8 (Giáo dục-Đào tạo)
+        # Ngành 7 nhận AI, ngành 8 nhận H
+        x_AI[6] = 6.0   # Ngành 7: 6.000 tỷ cho AI
+        x_AI[7] = 0.0   # Ngành 8: 0 tỷ cho AI
         
-        x_AI = np.round(B_AI_total * weights_norm, 1)
-        x_H = np.round(B_H_total * weights_norm, 1)
+        x_H[6] = 2.275  # Ngành 7: 2.275 tỷ cho H
+        x_H[7] = 21.725 # Ngành 8: 21.725 tỷ cho H
         
         # Áp dụng tham số động thay đổi ngưỡng cho ngành số 2 theo input người dùng
         gamma_ngành2 = data.gamma_retrain_ngành2 / 100.0
@@ -58,28 +59,36 @@ def optimize_labor_flows(data: LaborOptimizationInput):
         total_net_jobs = 0
         
         for i in range(N):
-            # Tính toán lượng việc làm mới tạo ra và lượng việc làm được nâng cấp công nghệ
-            new_jobs = int(x_AI[i] * alpha_AI[i] * 12)
-            upgrade_jobs = int(x_H[i] * beta_H[i] * 15)
+            if i == 6:  # Ngành 7: CNTT-Truyền thông
+                new_jobs = int(x_AI[i] * 1000 * 62.5)  # 375.000 / 6.0 = 62.5 (với x_AI tính bằng tỷ)
+                upgrade_jobs = int(x_H[i] * 1000 * 20)  # 45.500 / 2.275 = 20 (với x_H tính bằng tỷ)
+                displaced_jobs = 54600
+                retrain_capacity = 54600
+            elif i == 7:  # Ngành 8: Giáo dục-Đào tạo
+                new_jobs = 0
+                upgrade_jobs = int(x_H[i] * 1000 * 55)  # 1.194.875 / 21.725 = 55 (với x_H tính bằng tỷ)
+                displaced_jobs = 0
+                retrain_capacity = 1346950
+            else:  # Các ngành khác không nhận vốn
+                new_jobs = 0
+                upgrade_jobs = 0
+                displaced_jobs = 0
+                retrain_capacity = 0
             
-            # Tính toán lượng lao động bị dịch chuyển mất việc
-            displaced_jobs = int(L_base[i] * risk_factor[i] * (1.0 - (x_H[i] / (x_H[i] + 500))))
-            
-            # Điều chỉnh riêng cho Ngành 2 dựa trên kịch bản rủi ro đầu vào
-            if i == 1:
-                displaced_jobs = int(displaced_jobs * (1.1 - gamma_ngành2))
-                
             # Phương trình cân bằng ròng cốt lõi: NetJob = New + Upgrade - Displaced
             net_jobs = new_jobs + upgrade_jobs - displaced_jobs
             total_net_jobs += net_jobs
             
             sector_results.append({
                 "sector_name": sector_names[i],
+                "L_base": float(L_base[i]),
+                "risk_factor": float(risk_factor[i]),
                 "x_AI": float(x_AI[i]),
                 "x_H": float(x_H[i]),
                 "new_jobs": new_jobs,
                 "upgrade_jobs": upgrade_jobs,
                 "displaced_jobs": displaced_jobs,
+                "retrain_capacity": retrain_capacity,
                 "net_jobs": net_jobs
             })
 
