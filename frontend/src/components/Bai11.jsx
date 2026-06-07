@@ -79,7 +79,7 @@ export default function Bai11() {
         </p>
       </div>
 
-      {/* 4 Khối KPI (Khớp ảnh image_e0e55e) */}
+      {/* 4 Khối KPI */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '15px', marginBottom: '25px' }}>
         <div style={{ backgroundColor: '#0891b2', padding: '20px', borderRadius: '6px' }}>
           <h2 style={{ fontSize: '30px', margin: '0 0 5px 0', fontWeight: 'bold' }}>{resData ? formatInt(resData.kpi_episodes) : '--'}</h2>
@@ -99,7 +99,7 @@ export default function Bai11() {
         </div>
       </div>
 
-      {/* Dòng 1: Form & Bảng Action + Learning Curve (Khớp ảnh image_e0e528) */}
+      {/* Dòng 1: Form & Bảng Action + Learning Curve */}
       <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 2.8fr', gap: '20px', marginBottom: '25px' }}>
         
         {/* Form bên trái */}
@@ -108,18 +108,24 @@ export default function Bai11() {
             <h3 style={{ margin: '0 0 15px 0', fontSize: '14px', color: '#94a3b8', fontWeight: '600' }}>Tham số Q-learning</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div><label style={{ fontSize: '11px', color: '#fff', fontWeight: 'bold' }}>Episodes</label><input type="number" step="500" value={inputs.episodes} onChange={e => handleInputChange('episodes', e.target.value)} style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #334155', backgroundColor: '#fff', color: '#000' }} /></div>
-                <div><label style={{ fontSize: '11px', color: '#fff', fontWeight: 'bold' }}>Eval episodes</label><input type="number" step="50" value={inputs.eval_episodes} onChange={e => handleInputChange('eval_episodes', e.target.value)} style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #334155', backgroundColor: '#fff', color: '#000' }} /></div>
+                <div>
+                  <label style={{ fontSize: '11px', color: '#fff', fontWeight: 'bold' }}>Episodes</label>
+                  <input type="number" step="500" value={inputs.episodes} onChange={e => handleInputChange('episodes', e.target.value)} style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #334155', backgroundColor: '#0f172a', color: '#fff' }} />
+                </div>
+                <div>
+                  <label style={{ fontSize: '11px', color: '#fff', fontWeight: 'bold' }}>Eval episodes</label>
+                  <input type="number" step="50" value={inputs.eval_episodes} onChange={e => handleInputChange('eval_episodes', e.target.value)} style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #334155', backgroundColor: '#0f172a', color: '#fff' }} />
+                </div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-                <div><label style={{ fontSize: '11px', color: '#fff', fontWeight: 'bold' }}>&alpha;</label><input type="number" step="0.01" value={inputs.alpha} onChange={e => handleInputChange('alpha', e.target.value)} style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #334155', backgroundColor: '#fff', color: '#000' }} /></div>
-                <div><label style={{ fontSize: '11px', color: '#fff', fontWeight: 'bold' }}>&gamma;</label><input type="number" step="0.01" value={inputs.gamma} onChange={e => handleInputChange('gamma', e.target.value)} style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #334155', backgroundColor: '#fff', color: '#000' }} /></div>
-                <div><label style={{ fontSize: '11px', color: '#fff', fontWeight: 'bold' }}>Seed</label><input type="number" step="1" value={inputs.seed} onChange={e => handleInputChange('seed', e.target.value)} style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #334155', backgroundColor: '#fff', color: '#000' }} /></div>
+                <div><label style={{ fontSize: '11px', color: '#fff', fontWeight: 'bold' }}>&alpha;</label><input type="number" step="0.01" value={inputs.alpha} onChange={e => handleInputChange('alpha', e.target.value)} style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #334155', backgroundColor: '#0f172a', color: '#fff' }} /></div>
+                <div><label style={{ fontSize: '11px', color: '#fff', fontWeight: 'bold' }}>&gamma;</label><input type="number" step="0.01" value={inputs.gamma} onChange={e => handleInputChange('gamma', e.target.value)} style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #334155', backgroundColor: '#0f172a', color: '#fff' }} /></div>
+                <div><label style={{ fontSize: '11px', color: '#fff', fontWeight: 'bold' }}>Seed</label><input type="number" step="1" value={inputs.seed} onChange={e => handleInputChange('seed', e.target.value)} style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #334155', backgroundColor: '#0f172a', color: '#fff' }} /></div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-                <div><label style={{ fontSize: '11px', color: '#fff', fontWeight: 'bold' }}>&epsilon; start</label><input type="number" step="0.05" value={inputs.eps_start} onChange={e => handleInputChange('eps_start', e.target.value)} style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #334155', backgroundColor: '#fff', color: '#000' }} /></div>
-                <div><label style={{ fontSize: '11px', color: '#fff', fontWeight: 'bold' }}>&epsilon; end</label><input type="number" step="0.01" value={inputs.eps_end} onChange={e => handleInputChange('eps_end', e.target.value)} style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #334155', backgroundColor: '#fff', color: '#000' }} /></div>
-                <div><label style={{ fontSize: '11px', color: '#fff', fontWeight: 'bold' }}>&epsilon; decay episodes</label><input type="number" step="500" value={inputs.eps_decay_episodes} onChange={e => handleInputChange('eps_decay_episodes', e.target.value)} style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #334155', backgroundColor: '#fff', color: '#000' }} /></div>
+                <div><label style={{ fontSize: '11px', color: '#fff', fontWeight: 'bold' }}>&epsilon; start</label><input type="number" step="0.05" value={inputs.eps_start} onChange={e => handleInputChange('eps_start', e.target.value)} style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #334155', backgroundColor: '#0f172a', color: '#fff' }} /></div>
+                <div><label style={{ fontSize: '11px', color: '#fff', fontWeight: 'bold' }}>&epsilon; end</label><input type="number" step="0.01" value={inputs.eps_end} onChange={e => handleInputChange('eps_end', e.target.value)} style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #334155', backgroundColor: '#0f172a', color: '#fff' }} /></div>
+                <div><label style={{ fontSize: '11px', color: '#fff', fontWeight: 'bold' }}>&epsilon; decay</label><input type="number" step="500" value={inputs.eps_decay_episodes} onChange={e => handleInputChange('eps_decay_episodes', e.target.value)} style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #334155', backgroundColor: '#0f172a', color: '#fff' }} /></div>
               </div>
             </div>
             <button onClick={calculateQLearning} disabled={loading} style={{ width: '100%', marginTop: '20px', backgroundColor: '#0284c7', color: '#fff', border: 'none', padding: '10px', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>
@@ -160,7 +166,7 @@ export default function Bai11() {
                 <YAxis stroke="#94a3b8" fontSize={11} domain={[-1.6, -1.25]} label={{ value: 'Average reward', angle: -90, position: 'insideLeft', fill: '#94a3b8' }} />
                 <Tooltip contentStyle={{ backgroundColor: '#161a25', color: '#fff', border: '1px solid #334155' }} />
                 <Legend verticalAlign="top" height={36} />
-                <Line type="linear" dataKey="reward" stroke="#38bdf8" strokeWidth={2.5} dot={{ r: 2 }} name="Reward trung bình mỗi 100 episodes" />
+                <Line type="linear" dataKey="reward" stroke="#38bdf8" strokeWidth={2.5} dot={false} name="Reward trung bình mỗi 100 episodes" />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -169,7 +175,7 @@ export default function Bai11() {
 
       {isCalculated && resData && (
         <>
-          {/* Dòng 2: So sánh Policy & Action Count (Khớp ảnh image_e0e508) */}
+          {/* Dòng 2: So sánh Policy & Action Count */}
           <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1.5fr', gap: '20px', marginBottom: '25px' }}>
             <div style={{ backgroundColor: '#161a25', border: '1px solid #232936', borderRadius: '8px', padding: '20px' }}>
               <h4 style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '20px' }}>So sánh π* với rule-based policies</h4>
@@ -204,7 +210,7 @@ export default function Bai11() {
             </div>
           </div>
 
-          {/* Bảng Policy Sample (Khớp ảnh image_e0e4e8) */}
+          {/* Bảng Policy Sample */}
           <div style={{ backgroundColor: '#161a25', border: '1px solid #38bdf8', borderRadius: '8px', padding: '20px', marginBottom: '25px', overflowX: 'auto' }}>
             <h4 style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '15px' }}>Chính sách π*(s) tại 5 trạng thái khởi đầu</h4>
             <table style={{ width: '100%', fontSize: '13px', borderCollapse: 'collapse', textAlign: 'left' }}>
@@ -231,7 +237,7 @@ export default function Bai11() {
             </table>
           </div>
 
-          {/* Dòng cuối: Trajectory Table & Eval Table (Khớp ảnh image_e0e4e8) */}
+          {/* Dòng cuối: Trajectory Table & Eval Table */}
           <div style={{ display: 'grid', gridTemplateColumns: '1.7fr 1.3fr', gap: '20px', marginBottom: '25px' }}>
             <div style={{ backgroundColor: '#161a25', border: '1px solid #232936', borderRadius: '8px', padding: '20px', overflowX: 'auto' }}>
               <h4 style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '15px' }}>Quỹ đạo mô phỏng VN 2026 theo π*</h4>
@@ -251,7 +257,7 @@ export default function Bai11() {
                     <tr key={i} style={{ borderBottom: '1px solid #232936', color: '#cbd5e1' }}>
                       <td style={{ padding: '8px' }}>{row.year}</td>
                       <td style={{ padding: '8px' }}>{row.state}</td>
-                      <td style={{ padding: '8px', fontWeight: 'bold' }}>{row.action}</td>
+                      <td style={{ padding: '8px', fontWeight: 'bold', color: '#38bdf8' }}>{row.action}</td>
                       <td style={{ padding: '8px' }}>{formatSmart(row.reward)}</td>
                       <td style={{ padding: '8px' }}>{row.gdp_growth}</td>
                       <td style={{ padding: '8px' }}>{row.u_risk}</td>
@@ -276,8 +282,8 @@ export default function Bai11() {
                 <tbody>
                   {(resData.eval_table || []).map((row, i) => (
                     <tr key={i} style={{ borderBottom: '1px solid #232936', color: '#cbd5e1' }}>
-                      <td style={{ padding: '8px', fontWeight: '500' }}>{row.policy}</td>
-                      <td style={{ padding: '8px' }}>{formatSmart(row.avg)}</td>
+                      <td style={{ padding: '8px', fontWeight: 'bold' }}>{row.policy}</td>
+                      <td style={{ padding: '8px', color: '#34d399' }}>{formatSmart(row.avg)}</td>
                       <td style={{ padding: '8px' }}>{formatSmart(row.std)}</td>
                       <td style={{ padding: '8px' }}>{formatSmart(row.min)}</td>
                       <td style={{ padding: '8px' }}>{formatSmart(row.max)}</td>

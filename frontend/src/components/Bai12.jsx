@@ -39,16 +39,13 @@ export default function Bai12() {
       });
   };
 
-  // Format chuẩn số thập phân Việt Nam với độ chính xác cao
   const formatTableNumber = (num, decimals = 4) => {
     if (num === undefined || num === null) return "--";
-    // Ép kiểu string, đổi dấu chấm thành phẩy
     let parts = num.toFixed(decimals).split('.');
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     return parts.join(',');
   };
 
-  // Nút Tabs Custom
   const TabButton = ({ id, label }) => (
     <button
       onClick={() => setActiveTab(id)}
@@ -76,6 +73,7 @@ export default function Bai12() {
       <div style={{ marginBottom: '25px' }}>
         <h1 style={{ fontSize: '24px', fontWeight: 'bold', textTransform: 'uppercase' }}>BÀI 12 - ĐỒ ÁN TÍCH HỢP MÔ HÌNH AIDEOM-VN</h1>
       </div>
+
       {/* Mô hình toán học */}
       <div style={{ backgroundColor: '#161a25', border: '1px solid #232936', borderRadius: '8px', padding: '20px', marginBottom: '25px' }}>
         <div style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '15px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid #232936', paddingBottom: '12px' }}>
@@ -109,7 +107,7 @@ export default function Bai12() {
         </div>
       </div>
 
-      {/* Form Điều khiển ĐÃ FIX CÂN BẰNG HOÀN HẢO */}
+      {/* Form Điều khiển */}
       <div style={{ backgroundColor: '#161a25', border: '1px solid #232936', borderRadius: '8px', marginBottom: '25px', overflow: 'hidden' }}>
         <div style={{ backgroundColor: '#334155', padding: '12px 20px', borderBottom: '1px solid #232936' }}>
           <h3 style={{ margin: 0, fontSize: '15px', color: '#fff', fontWeight: '600' }}>Tham số chạy nguyên mẫu</h3>
@@ -165,7 +163,7 @@ export default function Bai12() {
                       <YAxis stroke="#94a3b8" fontSize={12} label={{ value: 'Balanced score', angle: -90, position: 'insideLeft', fill: '#94a3b8' }} />
                       <Tooltip contentStyle={{ backgroundColor: '#161a25', color: '#fff', border: '1px solid #334155' }} />
                       <Legend verticalAlign="top" height={36} />
-                      <Bar dataKey="score" fill="#93c5fd" name="Điểm cân bằng" barSize={70} />
+                      <Bar dataKey="score" fill="#38bdf8" name="Điểm cân bằng" barSize={70} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -179,7 +177,6 @@ export default function Bai12() {
                       <th style={{ padding: '10px' }}>Module</th>
                       <th style={{ padding: '10px' }}>Tên</th>
                       <th style={{ padding: '10px' }}>Kỹ thuật</th>
-                      <th style={{ padding: '10px' }}>Nguồn</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -188,7 +185,6 @@ export default function Bai12() {
                         <td style={{ padding: '10px', fontWeight: 'bold' }}>{row.id}</td>
                         <td style={{ padding: '10px' }}>{row.name}</td>
                         <td style={{ padding: '10px' }}>{row.tech}</td>
-                        <td style={{ padding: '10px' }}>{row.source}</td>
                       </tr>
                     ))}
                   </tbody>
