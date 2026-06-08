@@ -17,127 +17,137 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('home');
 
   const tabs = [
-    { id: 'home', name: '🏠 TRANG CHỦ TỔNG QUAN', component: <Home /> },
-    { id: 'bai1', name: 'PHÂN HỆ 01: Cobb-Douglas AI', component: <Bai01 /> },
-    { id: 'bai2', name: 'PHÂN HỆ 02: LP Ngân sách số', component: <Bai02 /> }, 
-    { id: 'bai3', name: 'PHÂN HỆ 03: Priority 10 ngành', component: <Bai03 /> },
-    { id: 'bai4', name: 'PHÂN HỆ 04: LP Ngành - Vùng', component: <Bai04 /> },
-    { id: 'bai5', name: 'PHÂN HỆ 05: MIP 15 dự án số', component: <Bai05 /> },
-    { id: 'bai6', name: 'PHÂN HỆ 06: TOPSIS 6 vùng', component: <Bai06 /> },
-    { id: 'bai7', name: 'PHÂN HỆ 07: Tối ưu đa mục tiêu', component: <Bai07 /> },
-    { id: 'bai8', name: 'PHÂN HỆ 08: Tối ưu động 2035', component: <Bai08 /> },
-    { id: 'bai9', name: 'PHÂN HỆ 09: Tác động lao động', component: <Bai09 /> },
-    { id: 'bai10', name: 'PHÂN HỆ 10: Bất định Stochastic', component: <Bai10 /> },
-    { id: 'bai11', name: 'PHÂN HỆ 11: Học tăng cường RL', component: <Bai11 /> },
-    { id: 'bai12', name: 'PHÂN HỆ 12: Đồ án AIDEOM-VN', component: <Bai12 /> },
+    { id: 'home', icon: '🌍', name: 'Trang chủ Tổng quan', component: <Home /> },
+    { id: 'bai1', icon: '📈', name: 'M1. Cobb-Douglas AI', component: <Bai01 /> },
+    { id: 'bai2', icon: '💰', name: 'M2. LP Ngân sách số', component: <Bai02 /> }, 
+    { id: 'bai3', icon: '🎯', name: 'M3. Priority 10 ngành', component: <Bai03 /> },
+    { id: 'bai4', icon: '🗺️', name: 'M4. LP Ngành - Vùng', component: <Bai04 /> },
+    { id: 'bai5', icon: '📦', name: 'M5. MIP Dự án số', component: <Bai05 /> },
+    { id: 'bai6', icon: '🏆', name: 'M6. TOPSIS 6 vùng', component: <Bai06 /> },
+    { id: 'bai7', icon: '⚖️', name: 'M7. NSGA-II Đa mục', component: <Bai07 /> },
+    { id: 'bai8', icon: '⏳', name: 'M8. Tối ưu động DP', component: <Bai08 /> },
+    { id: 'bai9', icon: '🛡️', name: 'M9. An sinh Việc làm', component: <Bai09 /> },
+    { id: 'bai10', icon: '🎲', name: 'M10. Stochastic', component: <Bai10 /> },
+    { id: 'bai11', icon: '🤖', name: 'M11. Q-Learning', component: <Bai11 /> },
+    { id: 'bai12', icon: '🚀', name: 'M12. AIDEOM-VN', component: <Bai12 /> },
   ];
 
   return (
-    <div style={{ 
-      backgroundColor: '#060913', 
-      minHeight: '100vh', 
-      fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
-      color: '#f1f5f9',
-      backgroundImage: 'radial-gradient(circle at 50% -20%, #1e1b4b 0%, transparent 50%), radial-gradient(circle at 0% 100%, #020617 0%, transparent 40%)',
-      paddingBottom: '60px',
-      boxSizing: 'border-box'
-    }}>
+    <div style={{ backgroundColor: '#e2e8f0', minHeight: '100vh', fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif", display: 'flex', overflow: 'hidden' }}>
       
-      {/* HEADER ĐIỀU HÀNH TRỤC NGANG */}
-      <header style={{
-        position: 'sticky', top: 0, zIndex: 100,
-        backgroundColor: 'rgba(10, 15, 30, 0.75)',
-        backdropFilter: 'blur(16px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
-        padding: '0 40px', height: '80px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+      {/* MENU KIỂU MỚI: FLOATING SIDEBAR BÊN TRÁI */}
+      <nav style={{
+        width: '280px',
+        backgroundColor: '#0f172a',
+        margin: '20px',
+        borderRadius: '24px',
+        display: 'flex',
+        flexDirection: 'column',
+        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
+        overflow: 'hidden',
+        flexShrink: 0
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', cursor: 'pointer' }} onClick={() => setActiveTab('home')}>
-          <div style={{
-            width: '40px', height: '40px', borderRadius: '10px',
-            background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 0 20px rgba(6, 182, 212, 0.4)', fontWeight: '900', fontSize: '20px', color: '#fff'
-          }}>V</div>
+        {/* Logo Section */}
+        <div style={{ padding: '30px 25px', borderBottom: '1px solid #1e293b', display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <div style={{ width: '45px', height: '45px', borderRadius: '12px', background: 'linear-gradient(135deg, #38bdf8 0%, #3b82f6 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '24px', fontWeight: '900', boxShadow: '0 4px 15px rgba(56,189,248,0.4)' }}>
+            A
+          </div>
           <div>
-            <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '900', letterSpacing: '0.5px', color: '#fff' }}>
-              AIDEOM<span style={{ color: '#06b6d4' }}>-VN</span>
-            </h2>
-            <div style={{ fontSize: '10px', color: '#64748b', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase' }}>
-              Macroeconomic Quantum Deck
-            </div>
+            <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '900', color: '#f8fafc', letterSpacing: '0.5px' }}>AIDEOM-VN</h2>
+            <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1px', marginTop: '4px' }}>Workspace</div>
           </div>
         </div>
 
-        <button 
-          onClick={() => setActiveTab('home')}
-          style={{
-            backgroundColor: activeTab === 'home' ? 'rgba(6, 182, 212, 0.15)' : 'transparent',
-            color: activeTab === 'home' ? '#06b6d4' : '#94a3b8',
-            border: activeTab === 'home' ? '1px solid rgba(6, 182, 212, 0.3)' : '1px solid rgba(255,255,255,0.05)',
-            padding: '8px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '13px',
-            transition: 'all 0.3s ease'
-          }}
-        >
-          🏠 MÀN HÌNH TỔNG QUAN
-        </button>
-      </header>
-
-      {/* THANH ĐIỀU HƯỚNG TẤT CẢ PHÂN HỆ */}
-      <div style={{ maxWidth: '1400px', margin: '30px auto 0 auto', padding: '0 40px' }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-          {tabs.filter(t => t.id !== 'home').map(tab => {
-            const isTabActive = activeTab === tab.id;
+        {/* Navigation Links */}
+        <div style={{ padding: '20px 15px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }} className="custom-scrollbar">
+          <div style={{ fontSize: '11px', color: '#64748b', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px', paddingLeft: '10px' }}>
+            Menu Điều Hành
+          </div>
+          
+          {tabs.map(tab => {
+            const isActive = activeTab === tab.id;
             return (
-              <div
+              <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 style={{
-                  padding: '10px 18px', borderRadius: '20px', cursor: 'pointer', fontSize: '12.5px',
-                  fontWeight: '600', transition: 'all 0.2s',
-                  backgroundColor: isTabActive ? '#06b6d4' : 'rgba(30, 41, 59, 0.4)',
-                  color: isTabActive ? '#000000' : '#94a3b8',
-                  boxShadow: isTabActive ? '0 0 15px rgba(6, 182, 212, 0.4)' : 'none',
-                  border: isTabActive ? '1px solid #06b6d4' : '1px solid rgba(255,255,255,0.03)'
+                  display: 'flex', alignItems: 'center', gap: '12px',
+                  padding: '12px 16px', borderRadius: '12px', border: 'none',
+                  backgroundColor: isActive ? '#1e293b' : 'transparent',
+                  color: isActive ? '#38bdf8' : '#cbd5e1',
+                  fontSize: '13.5px', fontWeight: isActive ? '700' : '500',
+                  cursor: 'pointer', transition: 'all 0.2s ease',
+                  textAlign: 'left',
+                  boxShadow: isActive ? 'inset 4px 0 0 #38bdf8' : 'none'
                 }}
               >
-                {tab.name}
-              </div>
+                <span style={{ fontSize: '18px', filter: isActive ? 'grayscale(0)' : 'grayscale(1)', opacity: isActive ? 1 : 0.7 }}>{tab.icon}</span>
+                <span>{tab.name}</span>
+              </button>
             );
           })}
         </div>
-      </div>
+      </nav>
 
-      {/* VÙNG HIỂN THỊ */}
-      <main style={{ maxWidth: '1400px', margin: '30px auto 0 auto', padding: '0 40px', boxSizing: 'border-box' }}>
-        <div style={{
-          backgroundColor: 'rgba(11, 17, 34, 0.7)',
-          borderRadius: '24px', border: '1px solid rgba(255, 255, 255, 0.05)',
-          padding: '40px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
-          position: 'relative'
-        }} className="quantum-dynamic-wrapper">
+      {/* KHÔNG GIAN NỘI DUNG CHÍNH (FLOATING MAIN) */}
+      <main style={{
+        flex: 1,
+        backgroundColor: '#ffffff',
+        margin: '20px 20px 20px 0',
+        borderRadius: '24px',
+        boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden'
+      }}>
+        {/* Topbar của Main Content */}
+        <header style={{ height: '70px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', padding: '0 40px', justifyContent: 'space-between', backgroundColor: '#ffffff', zIndex: 10 }}>
+          <div style={{ fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>
+            {tabs.find(t => t.id === activeTab)?.name}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981', display: 'inline-block', boxShadow: '0 0 10px #10b981' }}></span>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: '#64748b' }}>AIDEOM-VN: Mô hình tối ưu kinh tế tích hợp AI</span>
+          </div>
+        </header>
+
+        {/* Content Area */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '40px', boxSizing: 'border-box' }} className="light-theme-override custom-scrollbar">
           {tabs.find(t => t.id === activeTab)?.component}
         </div>
       </main>
 
+      {/* CSS ĐÈ MÀU TỰ ĐỘNG VÀ SCROLLBAR */}
       <style>{`
-        .quantum-dynamic-wrapper, .quantum-dynamic-wrapper div, .quantum-dynamic-wrapper p, .quantum-dynamic-wrapper span { color: #e2e8f0 !important; }
-        .quantum-dynamic-wrapper div[style*="background-color: #ffffff"], .quantum-dynamic-wrapper div[style*="backgroundColor: '#ffffff'"] {
-          background-color: rgba(22, 30, 54, 0.5) !important;
-          backdrop-filter: blur(10px) !important;
-          border: 1px solid rgba(255,255,255,0.05) !important;
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
-          border-radius: 16px !important;
+        /* Scrollbar đẹp */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        nav.custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+
+        /* ÉP MÀU NỀN SÁNG CHO 12 BÀI TẬP */
+        .light-theme-override { color: #334155 !important; }
+        .light-theme-override div[style*="background-color: #0f172a"], 
+        .light-theme-override div[style*="backgroundColor: '#0f172a'"],
+        .light-theme-override div[style*="background-color: rgba(20, 27, 45, 0.7)"] {
+          background-color: #ffffff !important; border: 1px solid #e2e8f0 !important; box-shadow: 0 4px 15px rgba(0,0,0,0.03) !important;
         }
-        .quantum-dynamic-wrapper button {
-          background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%) !important;
-          color: #000000 !important;
-          font-weight: 700 !important;
-          border: none !important;
-          border-radius: 8px !important;
-          padding: 10px 20px !important;
-          cursor: pointer !important;
+        .light-theme-override div[style*="background-color: #090d16"], 
+        .light-theme-override div[style*="backgroundColor: '#090d16'"] {
+          background-color: #f8fafc !important; border: 1px solid #e2e8f0 !important;
         }
+        .light-theme-override h1, .light-theme-override h2, .light-theme-override h3, .light-theme-override h4, .light-theme-override h5 {
+          color: #0f172a !important; border-color: #e2e8f0 !important;
+        }
+        .light-theme-override p, .light-theme-override span, .light-theme-override label, .light-theme-override td { color: #475569 !important; word-wrap: break-word; }
+        .light-theme-override input, .light-theme-override select { background-color: #ffffff !important; color: #0f172a !important; border: 1px solid #cbd5e1 !important; }
+        .light-theme-override table { background-color: #ffffff !important; border: 1px solid #e2e8f0 !important; }
+        .light-theme-override th { background-color: #f1f5f9 !important; color: #0f172a !important; border-bottom: 2px solid #cbd5e1 !important; }
+        .light-theme-override tr { border-bottom: 1px solid #e2e8f0 !important; }
+        .recharts-cartesian-grid-horizontal line, .recharts-cartesian-grid-vertical line { stroke: #f1f5f9 !important; }
+        .recharts-text { fill: #64748b !important; }
+        .recharts-default-tooltip { background-color: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 8px !important; color: #0f172a !important; box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important; }
       `}</style>
     </div>
   );
